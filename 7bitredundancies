@@ -1,0 +1,69 @@
+import matplotlib.pyplot as plt
+from scipy.special import comb
+import numpy as np
+
+# Define functions to compute No Error and Error probabilities 
+
+def compute_3bit(p):
+    # 3-bit majority vote
+    no_error = (1 - p)**3 + 3 * p * (1 - p)**2
+    error = p**3 + 3 * p**2 * (1 - p)
+    return no_error, error
+
+def compute_5bit(p):
+    # 5-bit majority vote
+    no_error = (1 - p)**5 + 5 * p * (1 - p)**4 + 10 * p**2 * (1 - p)**3
+    error = p**5 + 5 * p**4 * (1 - p) + 10 * p**3 * (1 - p)**2
+    return no_error, error
+
+def compute_7bit(p):
+    # 7-bit majority vote: No error if 0-3 bits are flipped
+    no_error = sum(comb(7, k) * (p ** k) * ((1 - p) ** (7 - k)) for k in range(0, 4))
+    error = sum(comb(7, k) * (p ** k) * ((1 - p) ** (7 - k)) for k in range(4, 8))
+    return no_error, error
+
+# === Generate a list of p values from 0 to 1 ===
+p_values = np.linspace(0, 1, 300)
+
+# Lists to store computed values
+f_no_error, f_error = [], []
+g_no_error, g_error = [], []
+h_no_error, h_error = [], []
+
+# Compute values for each p 
+for p in p_values:
+    no_e3, e3 = compute_3bit(p)
+    no_e5, e5 = compute_5bit(p)
+    no_e7, e7 = compute_7bit(p)
+
+    f_no_error.append(no_e3)
+    f_error.append(e3)
+    g_no_error.append(no_e5)
+    g_error.append(e5)
+    h_no_error.append(no_e7)
+    h_error.append(e7)
+
+# Plotting
+plt.figure(figsize=(12, 7))
+
+# 3-bit
+plt.plot(p_values, f_no_error, label="No Error (3-bit)", color='blue')
+plt.plot(p_values, f_error, label="Error (3-bit)", color='red')
+
+# 5-bit
+plt.plot(p_values, g_no_error, label="No Error (5-bit)", color='green')
+plt.plot(p_values, g_error, label="Error (5-bit)", color='orange')
+
+# 7-bit
+plt.plot(p_values, h_no_error, label="No Error (7-bit)", color='purple')
+plt.plot(p_values, h_error, label="Error (7-bit)", color='brown')
+
+# Extra plot info
+plt.axvline(x=0.5, color='gray', linestyle='--', label="p = 0.5")
+plt.xlabel("p (Bit Error Probability)")
+plt.ylabel("Probability")
+plt.title("Error Probability for 3, 5, and 7-Bit Redundancy Codes")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
